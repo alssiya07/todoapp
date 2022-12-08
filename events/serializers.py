@@ -5,6 +5,7 @@ from django.contrib.auth.models import User
 # todo list fields 
 
 class TodoSerilarizer(serializers.ModelSerializer):
+    # id=serializers.CharField(read_only=True)
     status=serializers.CharField(read_only=True)
     user=serializers.CharField(read_only=True)
     class Meta:
@@ -25,6 +26,7 @@ class RegistartionSerializer(serializers.ModelSerializer):
         fields=["first_name","last_name","username","password","email"]
 
 # create method calling from Model serializers
- 
+# encrypt the password
+
     def create(self, validated_data):
         return User.objects.create_user(**validated_data)

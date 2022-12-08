@@ -1,14 +1,19 @@
 from django.shortcuts import render
 from rest_framework.viewsets import ViewSet,ModelViewSet
 from rest_framework.response import Response
-from events.models import Todos
-from events.serializers import RegistartionSerializer, TodoSerilarizer
 from rest_framework.decorators import action
 from django.contrib.auth.models import User
 from rest_framework import authentication,permissions
 
-# ViewSet implementation
+from rest_framework import mixins
+from rest_framework import generics
 
+from events.models import Todos
+from events.serializers import RegistartionSerializer, TodoSerilarizer
+from events.custompermissions import IsOwnerPermission
+
+# ViewSet implementation
+# ------------------------------------------------------------------------------------
 class TodosView(ViewSet):
 
 # to get the todolist
@@ -55,12 +60,12 @@ class TodosView(ViewSet):
         else:
             return Response(data=serializer.errors)
 
-# -------------------------------------------------------------------
+# --------------------------------------------------------------------------------
 # model viewset have built-in implements of view set 
 # so it can extract from that class-method
 
 class TodosModelViews(ModelViewSet):
-
+    http_method_names=["post","get","put"]
     # authentication and permissions
     authentication_classes=[authentication.BasicAuthentication]
     permission_classes=[permissions.IsAuthenticated]
@@ -145,3 +150,13 @@ class UserView(ModelViewSet):
             return Response(data=serializer.data)
         else:
             return Response(data=serializer.errors)
+
+
+class TodoDeleteView(mixins.DestroyModelMixin,generics.GenericAPIView):
+    serializer_class=TodoSerilarizer
+    queryset=Todos.objects.all()
+    authentication_classes=[authentication.BasicAuthentication]
+    permission_classes=[permissions.IsAuthenticated]
+
+    def delete(self,request,*args,**kw):
+        return self.destroy(request,*args,**kw)
